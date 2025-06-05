@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПОПАЛСЯ!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #play-button {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        #play-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        #play-button::before {
+            content: "";
+            width: 0;
+            height: 0;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 25px solid white;
+            margin-left: 5px;
+        }
+        
+        #video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 10;
+        }
+        
+        #myVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #soundControl {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.5s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .sound-icon {
+            color: white;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Кнопка воспроизведения -->
+    <div id="play-button"></div>
+    
+    <!-- Контейнер для видео -->
+    <div id="video-container">
+        <video id="myVideo" loop width="1920" height="1080">
+            <source src="Rick Astley - Never Gonna Give You Up (Official Music Video).mp4" type="video/mp4">
+            <source src="Rick Astley - Never Gonna Give You Up (Official Music Video).webm" type="video/webm">
+            Ваш браузер не поддерживает видео
+        </video>
+    </div>
+    
+    <!-- Кнопка звука -->
+    <div id="soundControl">
+        <div class="sound-icon">🔇</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const playButton = document.getElementById('play-button');
+            const videoContainer = document.getElementById('video-container');
+            const video = document.getElementById('myVideo');
+            const soundControl = document.getElementById('soundControl');
+            const soundIcon = soundControl.querySelector('.sound-icon');
+            
+            // Функция для полноэкранного режима
+            function requestFullscreen() {
+                const container = document.documentElement;
+                
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            }
+            
+            // Включение звука
+            function enableSound() {
+                video.muted = false;
+                soundIcon.textContent = '🔊';
+                soundControl.onclick = disableSound;
+            }
+            
+            // Выключение звука
+            function disableSound() {
+                video.muted = true;
+                soundIcon.textContent = '🔇';
+                soundControl.onclick = enableSound;
+            }
+            
+            // Обработчик нажатия на кнопку воспроизведения
+            playButton.addEventListener('click', () => {
+                // Скрываем кнопку воспроизведения
+                playButton.style.opacity = '0';
+                playButton.style.pointerEvents = 'none';
+                
+                // Показываем видео
+                videoContainer.style.display = 'block';
+                
+                // Начинаем воспроизведение
+                video.play()
+                    .then(() => {
+                        // Показываем кнопку звука через 2 секунды
+                        setTimeout(() => {
+                            soundControl.style.opacity = '0.7';
+                        }, 2000);
+                        
+                        // Переход в полноэкранный режим
+                        setTimeout(requestFullscreen, 300);
+                        
+                        // Включаем звук
+                        enableSound();
+                    })
+                    .catch(e => {
+                        console.error('Ошибка воспроизведения:', e);
+                        // В случае ошибки показываем кнопку снова
+                        playButton.style.opacity = '1';
+                        playButton.style.pointerEvents = 'auto';
+                    });
+            });
+            
+            // Инициализация кнопки звука
+            soundControl.onclick = disableSound;
+            
+            // Авто-фокусировка на кнопке для мобильных устройств
+            playButton.focus();
+        });
+    </script>
+</body>
+</html>
